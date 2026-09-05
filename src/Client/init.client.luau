@@ -10,16 +10,22 @@ local ShopUI = require(script.ShopUI)
 local State = require(script.State)
 local WorldFx = require(script.WorldFx)
 
+local Formulas = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Formulas"))
+Formulas.waitForConfig(30)
+
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui") :: PlayerGui
-
-ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Formulas")
 
 local remotesFolder = ReplicatedStorage:WaitForChild("Remotes")
 local buyDummy = remotesFolder:WaitForChild("BuyDummy") :: RemoteEvent
 local buyUpgrade = remotesFolder:WaitForChild("BuyDummyUpgrade") :: RemoteEvent
 local buyGym = remotesFolder:WaitForChild("BuyGymLevel") :: RemoteEvent
 local requestSync = remotesFolder:WaitForChild("RequestSync") :: RemoteEvent
+
+local existing = playerGui:FindFirstChild("TheDummy")
+if existing ~= nil then
+	existing:Destroy()
+end
 
 local gui = Instance.new("ScreenGui")
 gui.Name = "TheDummy"
@@ -41,4 +47,17 @@ requestSync.OnClientEvent:Connect(function(snapshot: any)
 	State.apply(snapshot)
 end)
 
-requestSync:FireServer()
+local function pull()
+	requestSync:FireServer()
+end
+
+pull()
+task.spawn(function()
+	for _ = 1, 10 do
+		if State.hasSnapshot() then
+			return
+		end
+		task.wait(0.5)
+		pull()
+	end
+end)

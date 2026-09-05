@@ -39,6 +39,7 @@ local current: ClientState = {
 }
 
 local listeners: { Listener } = {}
+local applied = false
 
 local function copyCounts(raw: any): { [string]: number }
 	local copy: { [string]: number } = {}
@@ -55,6 +56,10 @@ end
 
 function State.get(): ClientState
 	return current
+end
+
+function State.hasSnapshot(): boolean
+	return applied
 end
 
 function State.dummyTotal(state: ClientState): number
@@ -101,6 +106,7 @@ function State.apply(raw: any)
 		persistOk = raw.persistOk
 	end
 
+	applied = true
 	current = {
 		bonk = Decimal.from(raw.bonk),
 		bonkPerSec = Decimal.from(raw.bonkPerSec),

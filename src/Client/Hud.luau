@@ -1,11 +1,30 @@
 --!strict
 -- Wave 1 HUD: Bonk, Bonk/sec, dummy count. Display only.
 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
 local Format = require(script.Parent.Format)
 local State = require(script.Parent.State)
 local Theme = require(script.Parent.Theme)
 
 local Hud = {}
+
+local function copyText(key: string, fallback: string): string
+	local shared = ReplicatedStorage:FindFirstChild("Shared")
+	local module = if shared then shared:FindFirstChild("Config") else nil
+	if module == nil then
+		return fallback
+	end
+	local ok, cfg = pcall(require, module)
+	if not ok or typeof(cfg) ~= "table" or typeof(cfg.copy) ~= "table" then
+		return fallback
+	end
+	local value = cfg.copy[key]
+	if typeof(value) == "string" and value ~= "" then
+		return value
+	end
+	return fallback
+end
 
 local function makeLabel(parent: Instance, name: string, size: UDim2, position: UDim2, textSize: number, color: Color3): TextLabel
 	local label = Instance.new("TextLabel")
@@ -28,11 +47,16 @@ function Hud.mount(gui: ScreenGui)
 	bar.Name = "Hud"
 	bar.AnchorPoint = Vector2.new(0, 0)
 	bar.Position = UDim2.fromOffset(16, 16)
-	bar.Size = UDim2.fromOffset(420, 92)
+	bar.Size = UDim2.new(0.5, -24, 0, 92)
 	bar.BackgroundColor3 = Theme.colors.panel
 	bar.BackgroundTransparency = 0.08
 	bar.BorderSizePixel = 0
 	bar.Parent = gui
+
+	local sizeLock = Instance.new("UISizeConstraint")
+	sizeLock.MinSize = Vector2.new(200, 92)
+	sizeLock.MaxSize = Vector2.new(440, 92)
+	sizeLock.Parent = bar
 
 	local corner = Instance.new("UICorner")
 	corner.CornerRadius = UDim.new(0, 12)
@@ -53,21 +77,36 @@ function Hud.mount(gui: ScreenGui)
 
 	local caption = makeLabel(bar, "Caption", UDim2.new(0.55, 0, 0, 16), UDim2.fromOffset(0, 0), 14, Theme.colors.muted)
 	caption.Font = Theme.font.body
-	caption.Text = "BONK"
+	caption.TextTruncate = Enum.TextTruncate.AtEnd
+	caption.Text = copyText("bonk", "Bonk")
 
 	local dummyCount = makeLabel(bar, "DummyCount", UDim2.new(0.45, 0, 0, 16), UDim2.new(0.55, 0, 0, 0), 14, Theme.colors.muted)
 	dummyCount.Font = Theme.font.body
 	dummyCount.TextXAlignment = Enum.TextXAlignment.Right
+	dummyCount.TextTruncate = Enum.TextTruncate.AtEnd
 	dummyCount.Text = "Dummies  0"
 
 	local bonk = makeLabel(bar, "Bonk", UDim2.new(1, 0, 0, 36), UDim2.fromOffset(0, 16), 32, Theme.colors.bonk)
 	bonk.Text = "0"
+	bonk.TextScaled = true
+	local bonkSize = Instance.new("UITextSizeConstraint")
+	bonkSize.MinTextSize = 18
+	bonkSize.MaxTextSize = 32
+	bonkSize.Parent = bonk
 
 	local rate = makeLabel(bar, "Rate", UDim2.new(1, 0, 0, 22), UDim2.fromOffset(0, 52), 18, Theme.colors.text)
 	rate.Font = Theme.font.body
 	rate.Text = "0/sec"
 
 	State.subscribe(function(state)
+		local bonkName = copyText("bonk", "Bonk")
+		if state.persistOk then
+			caption.Text = bonkName
+			caption.TextColor3 = Theme.colors.muted
+		else
+			caption.Text = bonkName .. "  ·  not saving"
+			caption.TextColor3 = Theme.colors.bonk
+		end
 		bonk.Text = Format.bonk(state.bonk)
 		rate.Text = Format.rate(state.bonkPerSec)
 		dummyCount.Text = "Dummies  " .. tostring(State.dummyTotal(state))

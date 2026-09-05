@@ -74,6 +74,17 @@ local function loadConfig(): any
 	return {}
 end
 
+local function copyText(key: string, fallback: string): string
+	local copy = pick(loadConfig(), { "copy", "Copy" })
+	if isTable(copy) then
+		local value = copy[key]
+		if typeof(value) == "string" and value ~= "" then
+			return value
+		end
+	end
+	return fallback
+end
+
 local function dummiesRoot(cfg: any): any
 	local root = pick(cfg, { "dummies", "Dummies", "dummyTypes", "DummyTypes" })
 	return if isTable(root) then root else {}
@@ -125,14 +136,24 @@ local function orderedDummyIds(): { string }
 	local ids: { string } = {}
 	local seen: { [string]: boolean } = {}
 
+	local function push(id: any)
+		if typeof(id) == "string" and not seen[id] and Formulas.knownDummyId(id) then
+			seen[id] = true
+			table.insert(ids, id)
+		end
+	end
+
+	local order = pick(cfg, { "dummyOrder", "DummyOrder" })
+	if isTable(order) then
+		for _, id in order do
+			push(id)
+		end
+	end
+
 	if isTable(root[1]) then
 		for _, def in root do
 			if isTable(def) then
-				local id = pick(def, { "id", "Id" })
-				if typeof(id) == "string" and not seen[id] and Formulas.knownDummyId(id) then
-					seen[id] = true
-					table.insert(ids, id)
-				end
+				push(pick(def, { "id", "Id" }))
 			end
 		end
 	end
@@ -140,7 +161,6 @@ local function orderedDummyIds(): { string }
 	local keyed: { string } = {}
 	for key, def in root do
 		if typeof(key) == "string" and isTable(def) and not seen[key] and Formulas.knownDummyId(key) then
-			seen[key] = true
 			table.insert(keyed, key)
 		end
 	end
@@ -153,14 +173,11 @@ local function orderedDummyIds(): { string }
 		return a < b
 	end)
 	for _, id in keyed do
-		table.insert(ids, id)
+		push(id)
 	end
 
 	Formulas.eachDummyDef(function(id, _raw)
-		if not seen[id] then
-			seen[id] = true
-			table.insert(ids, id)
-		end
+		push(id)
 	end)
 
 	return ids
@@ -168,6 +185,21 @@ end
 
 local function upgradeIdForDummy(dummyId: string): string?
 	local cfg = loadConfig()
+	local order = pick(cfg, { "dummyUpgradeOrder", "DummyUpgradeOrder" })
+	if isTable(order) then
+		for _, id in order do
+			if typeof(id) == "string" then
+				local raw = Formulas.upgradeRaw(id)
+				if isTable(raw) then
+					local target = pick(raw, { "dummyId", "DummyId", "dummy", "Dummy" })
+					if target == dummyId then
+						return id
+					end
+				end
+			end
+		end
+	end
+
 	local root = upgradesRoot(cfg)
 	local listed: { string } = {}
 
@@ -176,7 +208,7 @@ local function upgradeIdForDummy(dummyId: string): string?
 			local id = if typeof(key) == "string" then key else pick(def, { "id", "Id" })
 			local target = pick(def, { "dummyId", "DummyId", "dummy", "Dummy" })
 			if typeof(id) == "string" and (target == dummyId or target == nil and id == dummyId) then
-				if Formulas.knownUpgradeId(id) then
+				if Formulas.upgradeRaw(id) ~= nil then
 					table.insert(listed, id)
 				end
 			end
@@ -268,10 +300,10 @@ end
 
 local function affordLabel(kind: BuyKind, cost: Decimal?): string
 	if kind == "locked" then
-		return "Locked"
+		return copyText("locked", "Locked")
 	end
 	if kind == "max" then
-		return "MAX"
+		return copyText("maxed", "Max")
 	end
 	if cost == nil then
 		return "—"
@@ -317,8 +349,8 @@ function ShopUI.mount(gui: ScreenGui, remotes: Remotes)
 
 	local dummiesTab = makeButton(tabs, "Dummies", UDim2.new(0.5, -4, 1, 0), UDim2.fromOffset(0, 0))
 	local gymTab = makeButton(tabs, "ThisGym", UDim2.new(0.5, -4, 1, 0), UDim2.new(0.5, 4, 0, 0))
-	dummiesTab.Text = "Dummies"
-	gymTab.Text = "This Gym"
+	dummiesTab.Text = copyText("tabDummies", "Dummies")
+	gymTab.Text = copyText("tabGym", "This Gym")
 
 	local dummiesPage = Instance.new("ScrollingFrame")
 	dummiesPage.Name = "DummiesPage"
@@ -419,11 +451,16 @@ function ShopUI.mount(gui: ScreenGui, remotes: Remotes)
 	gymHint.TextSize = 13
 	gymHint.TextColor3 = Theme.colors.muted
 	gymHint.TextXAlignment = Enum.TextXAlignment.Left
+	gymHint.TextTruncate = Enum.TextTruncate.AtEnd
 	gymHint.Text = "Fighters hit harder in this venue."
 	gymHint.Parent = gymCard
 
 	local gymBuy = makeButton(gymCard, "Buy", UDim2.new(1, 0, 0, 36), UDim2.new(0, 0, 1, -36))
 	gymBuy.Activated:Connect(function()
+		local state = State.get()
+		if state.gymLevel >= Formulas.gymMaxLevel() then
+			return
+		end
 		remotes.buyGym:FireServer()
 	end)
 
@@ -522,12 +559,31 @@ function ShopUI.mount(gui: ScreenGui, remotes: Remotes)
 		end
 
 		buy.Activated:Connect(function()
+			local state = State.get()
+			if not Formulas.canUnlockDummy(dummyId, state.lifetimeGymRep) then
+				return
+			end
+			local def = Formulas.dummyDef(dummyId)
+			local owned = math.max(0, math.floor(state.dummies[dummyId] or 0))
+			if def ~= nil and owned >= def.maxCount then
+				return
+			end
 			remotes.buyDummy:FireServer(dummyId)
 		end)
 		upgrade.Activated:Connect(function()
-			if upgradeId ~= nil then
-				remotes.buyUpgrade:FireServer(upgradeId)
+			if upgradeId == nil then
+				return
 			end
+			local state = State.get()
+			if not Formulas.canUnlockDummy(dummyId, state.lifetimeGymRep) then
+				return
+			end
+			local upgradeDef = Formulas.upgradeDef(upgradeId)
+			local level = math.max(0, math.floor(state.dummyUpgrades[upgradeId] or 0))
+			if upgradeDef ~= nil and level >= upgradeDef.maxLevel then
+				return
+			end
+			remotes.buyUpgrade:FireServer(upgradeId)
 		end)
 
 		return {
@@ -569,16 +625,22 @@ function ShopUI.mount(gui: ScreenGui, remotes: Remotes)
 		local cfg = loadConfig()
 		local gym = gymRoot(cfg)
 		local named = pick(gym, { "name", "Name", "displayName", "DisplayName" })
+		local venues = pick(cfg, { "venues", "Venues" })
+		local venue = if isTable(venues) then venues[state.venueId] else nil
+		local venueName = pick(venue, { "name", "Name", "displayName", "DisplayName" })
 		if typeof(named) == "string" and named ~= "" then
 			gymTitle.Text = named
+		elseif typeof(venueName) == "string" and venueName ~= "" then
+			gymTitle.Text = venueName
 		else
-			gymTitle.Text = "This Gym"
+			gymTitle.Text = copyText("tabGym", "This Gym")
 		end
 
 		local maxLevel = Formulas.gymMaxLevel()
 		local level = math.clamp(state.gymLevel, 1, maxLevel)
 		gymLevel.Text = `Level {level} / {maxLevel}`
 		gymBar.Size = UDim2.new(level / maxLevel, 0, 1, 0)
+		gymHint.Text = `Fighters hit ×{level} in this venue.`
 
 		local atMax = level >= maxLevel
 		local cost = if atMax then nil else Formulas.gymCost(level)
@@ -608,7 +670,14 @@ function ShopUI.mount(gui: ScreenGui, remotes: Remotes)
 			row.owned.Text = if def ~= nil and def.maxCount < 100000 then `x{owned} / {def.maxCount}` else `x{owned}`
 			local note = dummyNote(row.dummyId)
 			if locked then
-				row.note.Text = if note ~= "" then note else "Locked"
+				local need = if def ~= nil then def.unlockRep else 0
+				if need > 0 then
+					row.note.Text = `Needs {need} Gym Rep`
+				elseif note ~= "" then
+					row.note.Text = note
+				else
+					row.note.Text = copyText("locked", "Locked")
+				end
 			else
 				row.note.Text = note
 			end
@@ -645,6 +714,8 @@ function ShopUI.mount(gui: ScreenGui, remotes: Remotes)
 	end
 
 	local function refresh(state: ClientState)
+		dummiesTab.Text = copyText("tabDummies", "Dummies")
+		gymTab.Text = copyText("tabGym", "This Gym")
 		refreshDummies(state)
 		refreshGym(state)
 	end
@@ -652,10 +723,7 @@ function ShopUI.mount(gui: ScreenGui, remotes: Remotes)
 	State.subscribe(refresh)
 
 	task.spawn(function()
-		local shared = ReplicatedStorage:WaitForChild("Shared")
-		if shared:FindFirstChild("Config") == nil then
-			shared:WaitForChild("Config", 60)
-		end
+		Formulas.waitForConfig(60)
 		refresh(State.get())
 	end)
 end
