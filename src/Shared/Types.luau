@@ -33,6 +33,8 @@ export type ColorRgb = {
 }
 
 -- Raw dummy row in Config. dummyPower in the hit formula is basePower + upgrade bonus.
+-- upgradeBaseCost / maxUpgradeLevel stay 0 when dummyUpgrades[] is the live shop,
+-- so BuyDummyUpgrade(dummyId) cannot stack a second track.
 export type DummyConfig = {
 	id: DummyId,
 	name: string,
@@ -76,9 +78,12 @@ export type GymLevelConfig = {
 }
 
 export type GymConfig = {
+	name: string,
 	maxLevel: number,
 	baseCost: Cost,
 	costGrowth: number,
+	-- Formulas.gymCost uses baseCost * costGrowth^(currentLevel-1) unless `costs` is set.
+	costs: { [number]: Cost }?,
 	levels: { GymLevelConfig },
 }
 
@@ -182,6 +187,7 @@ export type Config = {
 	copy: CopyConfig,
 }
 
+-- Matches PlayerData.Profile. Bonk is Decimal { m, e }, never a raw number.
 export type Profile = {
 	bonk: Decimal,
 	lifetimeBonk: Decimal,
@@ -197,11 +203,12 @@ export type Profile = {
 	repNodes: { [string]: boolean },
 }
 
+-- Wire payload from RequestSync. Bonk fields are Decimal { m, e }, not display strings.
 export type Snapshot = {
-	bonk: string,
-	bonkPerSec: string,
-	lifetimeBonk: string,
-	peakBonkThisRun: string,
+	bonk: Decimal,
+	bonkPerSec: Decimal,
+	lifetimeBonk: Decimal,
+	peakBonkThisRun: Decimal,
 	dummies: { [string]: number },
 	dummyUpgrades: { [string]: number },
 	gymLevel: number,

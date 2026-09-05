@@ -8,8 +8,8 @@ local Types = require(script.Parent.Types)
 local Config: Types.Config = {
 	wave = 1,
 
-	tickInterval = 0.25,
-	offlineCapSeconds = 1800, -- Backyard. Formulas reads this in Wave 1.
+	tickInterval = 1,
+	offlineCapSeconds = 1800, -- 30m cap. Must be > 0 so rejoin grants offline Bonk.
 	buyCooldownSeconds = 0.15,
 
 	start = {
@@ -44,6 +44,8 @@ local Config: Types.Config = {
 			unlockRep = 0,
 			penBodies = 1,
 			tint = { r = 1, g = 0.85, b = 0.15 },
+			-- DummyDef keys Formulas reads. Stay 0 so BuyDummyUpgrade(dummyId) is not a
+			-- second stack; the live shop is dummyUpgrades.yellow_power.
 			upgradeBaseCost = 0,
 			upgradeCostGrowth = 1,
 			powerPerUpgrade = 0,
@@ -55,7 +57,7 @@ local Config: Types.Config = {
 			name = "Fat Dummy",
 			role = "Tankier stay-time, mid power",
 			sortOrder = 2,
-			baseCost = 150,
+			baseCost = 100,
 			costGrowth = 1.18,
 			basePower = 2,
 			hitInterval = 1.25,
@@ -76,7 +78,7 @@ local Config: Types.Config = {
 			name = "Gold Dummy",
 			role = "High Bonk per hit",
 			sortOrder = 3,
-			baseCost = 2500,
+			baseCost = 1500,
 			costGrowth = 1.22,
 			basePower = 10,
 			hitInterval = 1,
@@ -104,7 +106,7 @@ local Config: Types.Config = {
 			stayTime = 1, -- combo 2
 			maxCount = 30,
 			startingCount = 0,
-			unlockRep = 25,
+			unlockRep = 25, -- > 0: Wave 1 cannot buy (no Gym Rep yet)
 			penBodies = 3,
 			tint = { r = 0.72, g = 0.72, b = 0.78 },
 			upgradeBaseCost = 0,
@@ -125,7 +127,7 @@ local Config: Types.Config = {
 			baseCost = 25,
 			costGrowth = 1.35,
 			maxLevel = 10,
-			powerPerLevel = 0.25,
+			powerPerLevel = 0.5,
 			stayTimePerLevel = 0,
 		},
 		fat_stay = {
@@ -133,7 +135,7 @@ local Config: Types.Config = {
 			name = "Stay Down",
 			dummyId = "fat",
 			sortOrder = 2,
-			baseCost = 400,
+			baseCost = 250,
 			costGrowth = 1.4,
 			maxLevel = 8,
 			powerPerLevel = 0,
@@ -164,22 +166,23 @@ local Config: Types.Config = {
 	},
 
 	-- Backyard gym. Formulas.gymCost(currentLevel) = baseCost * costGrowth^(currentLevel-1).
-	-- levels[n].cost must match that buy price. multiplier is the gymLevel combat term.
+	-- levels[n].cost is the Bonk to BUY that level (must match the formula). Level 1 is free.
 	gym = {
+		name = "Backyard Gym",
 		maxLevel = 10,
 		baseCost = 50,
-		costGrowth = 2.5,
+		costGrowth = 2,
 		levels = {
 			{ level = 1, multiplier = 1, cost = 0 },
 			{ level = 2, multiplier = 2, cost = 50 },
-			{ level = 3, multiplier = 3, cost = 125 },
-			{ level = 4, multiplier = 4, cost = 312.5 },
-			{ level = 5, multiplier = 5, cost = 781.25 },
-			{ level = 6, multiplier = 6, cost = 1953.125 },
-			{ level = 7, multiplier = 7, cost = 4882.8125 },
-			{ level = 8, multiplier = 8, cost = 12207.03125 },
-			{ level = 9, multiplier = 9, cost = 30517.578125 },
-			{ level = 10, multiplier = 10, cost = 76293.9453125 },
+			{ level = 3, multiplier = 3, cost = 100 },
+			{ level = 4, multiplier = 4, cost = 200 },
+			{ level = 5, multiplier = 5, cost = 400 },
+			{ level = 6, multiplier = 6, cost = 800 },
+			{ level = 7, multiplier = 7, cost = 1600 },
+			{ level = 8, multiplier = 8, cost = 3200 },
+			{ level = 9, multiplier = 9, cost = 6400 },
+			{ level = 10, multiplier = 10, cost = 12800 },
 		},
 	},
 
