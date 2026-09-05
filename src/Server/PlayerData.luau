@@ -26,10 +26,10 @@ export type Profile = {
 }
 
 export type Snapshot = {
-	bonk: string,
-	bonkPerSec: string,
-	lifetimeBonk: string,
-	peakBonkThisRun: string,
+	bonk: { m: number, e: number },
+	bonkPerSec: { m: number, e: number },
+	lifetimeBonk: { m: number, e: number },
+	peakBonkThisRun: { m: number, e: number },
 	dummies: { [string]: number },
 	dummyUpgrades: { [string]: number },
 	gymLevel: number,
@@ -362,10 +362,10 @@ function PlayerData.snapshot(player: Player): Snapshot?
 		venueId = profile.venueId,
 	})
 	return {
-		bonk = Decimal.toSci(profile.bonk),
-		bonkPerSec = Decimal.toSci(rate),
-		lifetimeBonk = Decimal.toSci(profile.lifetimeBonk),
-		peakBonkThisRun = Decimal.toSci(profile.peakBonkThisRun),
+		bonk = Decimal.toPayload(profile.bonk),
+		bonkPerSec = Decimal.toPayload(rate),
+		lifetimeBonk = Decimal.toPayload(profile.lifetimeBonk),
+		peakBonkThisRun = Decimal.toPayload(profile.peakBonkThisRun),
 		dummies = copyCounts(profile.dummies),
 		dummyUpgrades = copyCounts(profile.dummyUpgrades),
 		gymLevel = profile.gymLevel,
