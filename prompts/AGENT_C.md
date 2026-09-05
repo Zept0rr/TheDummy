@@ -24,7 +24,9 @@ git branch --show-current
 
 If you are not on `the-dummy` or not in that folder, stop and fix that before editing.
 
-Agent B may be committing `src/Client/**` on the same branch. Pull/status before you commit. Touch only your files so you do not clobber them.
+`src/Shared/Config.luau` and `src/Shared/Types.luau` are **already committed** on this branch. Inspect them and continue (tune Wave 1 numbers, fill gaps). Do not rewrite from scratch. Do not copy from `C:\Users\zepto\TheDummy` unless `git status` shows those files missing.
+
+Agent B may be committing `src/Client/**` on the same branch. `git status` before you commit. Touch only your files so you do not clobber them.
 
 ### Commit rules
 

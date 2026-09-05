@@ -24,15 +24,7 @@ git branch --show-current
 
 If you are not on `the-dummy` or not in that folder, stop and fix that before editing.
 
-### Bring over Client files already started in main
-
-Agent B already wrote untracked Client files in the **main** checkout. They are **not** in the worktree yet. Copy them in, then continue — do not rewrite from scratch.
-
-```powershell
-Copy-Item -Force "C:\Users\zepto\TheDummy\src\Client\*" "C:\Users\zepto\worktrees\TheDummy\src\Client\"
-```
-
-Existing files: `init.client.luau`, `Hud.luau`, `ShopUI.luau`, `State.luau`, `Format.luau`, `Theme.luau`, `WorldFx.luau`.
+Wave 1 Client files are **already committed** on this branch (`init.client.luau`, `Hud.luau`, `ShopUI.luau`, `State.luau`, `Format.luau`, `Theme.luau`, `WorldFx.luau`). Inspect them and continue. Do not rewrite from scratch. Do not copy from `C:\Users\zepto\TheDummy` unless `git status` shows those files missing.
 
 ### Commit rules
 
