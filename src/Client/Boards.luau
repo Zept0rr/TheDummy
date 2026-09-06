@@ -244,7 +244,7 @@ local function makeButton(parent: Instance, name: string, color: Color3): TextBu
 	button.BorderSizePixel = 0
 	button.Size = UDim2.new(0.5, -5, 1, 0)
 	button.Font = Theme.font.title
-	button.TextSize = 22
+	button.TextSize = 24
 	button.TextColor3 = Color3.new(1, 1, 1)
 	button.BackgroundColor3 = color
 	button.Text = ""
@@ -275,7 +275,8 @@ local function makeCard(part: BasePart, face: Enum.NormalId, showUpgrade: boolea
 	gui.PixelsPerStud = cardPixelsPerStud()
 	gui.LightInfluence = 0
 	gui.AlwaysOnTop = false
-	gui.MaxDistance = 90
+	gui.Brightness = 2
+	gui.MaxDistance = 140
 	gui.ZOffset = 2
 	gui.Active = true
 	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
@@ -311,18 +312,23 @@ local function makeCard(part: BasePart, face: Enum.NormalId, showUpgrade: boolea
 	list.SortOrder = Enum.SortOrder.LayoutOrder
 	list.Parent = frame
 
-	local title = makeLabel(frame, "Title", 36, 28, Color3.new(1, 1, 1), Theme.font.title)
+	local title = makeLabel(frame, "Title", 40, 32, Color3.new(1, 1, 1), Theme.font.title)
 	title.LayoutOrder = 1
-	local owned = makeLabel(frame, "Owned", 26, 20, Theme.colors.muted, Theme.font.body)
+	title.TextScaled = true
+	local titleSize = Instance.new("UITextSizeConstraint")
+	titleSize.MinTextSize = 22
+	titleSize.MaxTextSize = 36
+	titleSize.Parent = title
+	local owned = makeLabel(frame, "Owned", 28, 22, Theme.colors.cost, Theme.font.title)
 	owned.LayoutOrder = 2
-	local effect = makeLabel(frame, "Effect", 40, 16, Theme.colors.muted, Theme.font.body)
+	local effect = makeLabel(frame, "Effect", 36, 16, Theme.colors.muted, Theme.font.body)
 	effect.LayoutOrder = 3
 	effect.TextWrapped = true
 
 	local buttonRow = Instance.new("Frame")
 	buttonRow.Name = "Buttons"
 	buttonRow.BackgroundTransparency = 1
-	buttonRow.Size = UDim2.new(1, 0, 0, 48)
+	buttonRow.Size = UDim2.new(1, 0, 0, 56)
 	buttonRow.LayoutOrder = 4
 	buttonRow.Parent = frame
 
@@ -540,10 +546,11 @@ local function bindDummy(id: string, remotes: Remotes): DummyBinding?
 		local affordable = cost ~= nil and Decimal.gte(state.bonk, cost)
 		local buyKind = kind(affordable, atMax, locked)
 		local name = dummyName(id)
-		local ownedText = if def ~= nil then `Owned {owned} / {def.maxCount}` else `Owned {owned}`
+		local lv = copyText("level", "Lv")
+		local ownedText = if def ~= nil then `{owned} / {def.maxCount}` else tostring(owned)
 
 		card.title.Text = name
-		card.owned.Text = if locked then copyText("locked", "Locked") else ownedText
+		card.owned.Text = if locked then copyText("locked", "Locked") else `{lv} {ownedText}`
 		card.effect.Text = if locked then copyText("needsRep", "Needs Gym Rep") else dummyRole(id)
 
 		paintButton(card.buy, buyKind, Theme.colors.buy, copyText("buy", "Buy"))
@@ -571,7 +578,6 @@ local function bindDummy(id: string, remotes: Remotes): DummyBinding?
 			local upgradeCost = Formulas.upgradeCost(upgradeId, level)
 			local upgradeAfford = upgradeCost ~= nil and Decimal.gte(state.bonk, upgradeCost)
 			local upgradeKind = kind(upgradeAfford, upgradeMax, false)
-			local lv = copyText("level", "Lv")
 			paintButton(card.upgrade, upgradeKind, Theme.colors.upgrade, `{copyText("upgrade", "Upgrade")}  {lv} {level}`)
 			paintCost(card.upgradeCost, upgradeKind, upgradeCost)
 			paintPrompt(upgradePrompt, upgradeKind, copyText("upgrade", "Upgrade"), `{lv} {level}`)
@@ -611,9 +617,7 @@ local function bindGym(remotes: Remotes): DummyBinding
 
 		card.title.Text = title
 		card.owned.Text = ownedText
-		card.effect.Text = if typeof(flavor) == "string" and flavor ~= ""
-			then flavor
-			else "Fighters hit harder in this venue."
+		card.effect.Text = if typeof(flavor) == "string" then flavor else ""
 		paintButton(card.buy, buyKind, Theme.colors.buy, copyText("gymBuy", "Buy gym level"))
 		paintCost(card.buyCost, buyKind, cost)
 		paintPrompt(buyPrompt, buyKind, copyText("gymBuy", "Buy gym level"), ownedText)
@@ -622,8 +626,48 @@ local function bindGym(remotes: Remotes): DummyBinding
 	return { refresh = refresh }
 end
 
+local function bindBoardTitle(path: { string }, copyKey: string, face: Enum.NormalId)
+	local part = asPart(follow(path))
+	if part == nil then
+		return
+	end
+	clearClientUi(part)
+
+	local gui = Instance.new("SurfaceGui")
+	gui.Name = "TitleGui"
+	gui.Face = face
+	gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+	gui.PixelsPerStud = cardPixelsPerStud()
+	gui.LightInfluence = 0
+	gui.AlwaysOnTop = false
+	gui.Brightness = 2
+	gui.MaxDistance = 160
+	gui.ZOffset = 4
+	gui.Active = false
+	gui:SetAttribute("ClientBoard", true)
+	gui.Parent = part
+
+	local label = Instance.new("TextLabel")
+	label.Name = "Title"
+	label.BackgroundTransparency = 1
+	label.Size = UDim2.fromScale(1, 1)
+	label.Font = Theme.font.title
+	label.TextColor3 = Color3.new(1, 1, 1)
+	label.TextScaled = true
+	label.Text = copyText(copyKey, "")
+	label.Parent = gui
+
+	local size = Instance.new("UITextSizeConstraint")
+	size.MinTextSize = 18
+	size.MaxTextSize = 48
+	size.Parent = label
+end
+
 function Boards.mount(remotes: Remotes)
 	Workspace:WaitForChild("Backyard", 8)
+
+	bindBoardTitle({ "Backyard", "DummyBoard", "Title" }, "tabDummies", Enum.NormalId.Right)
+	bindBoardTitle({ "Backyard", "GymBoard", "Title" }, "tabGym", Enum.NormalId.Left)
 
 	local bindings: { DummyBinding } = {}
 	for _, id in DUMMY_IDS do
