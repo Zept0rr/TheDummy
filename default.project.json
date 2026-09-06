@@ -36,14 +36,14 @@
     "Lighting": {
       "$className": "Lighting",
       "$properties": {
-        "Brightness": 2,
-        "Ambient": [0.35, 0.32, 0.28],
-        "OutdoorAmbient": [0.45, 0.48, 0.4],
-        "ClockTime": 14.5,
-        "GeographicLatitude": 40,
+        "Brightness": 2.2,
+        "Ambient": [0.42, 0.36, 0.3],
+        "OutdoorAmbient": [0.5, 0.48, 0.4],
+        "ClockTime": 15,
+        "GeographicLatitude": 35,
         "GlobalShadows": true,
-        "EnvironmentDiffuseScale": 0.4,
-        "EnvironmentSpecularScale": 0.3
+        "EnvironmentDiffuseScale": 0.25,
+        "EnvironmentSpecularScale": 0.15
       }
     },
     "SoundService": {
@@ -65,8 +65,8 @@
             "Anchored": true,
             "Size": [96, 1, 96],
             "Position": [0, 0.5, 0],
-            "Color": [0.42, 0.58, 0.28],
-            "Material": "Grass",
+            "Color": [0.36, 0.29, 0.22],
+            "Material": "SmoothPlastic",
             "TopSurface": "Smooth",
             "BottomSurface": "Smooth"
           }
@@ -75,10 +75,121 @@
           "$className": "Part",
           "$properties": {
             "Anchored": true,
-            "Size": [28, 0.4, 28],
-            "Position": [0, 1.2, -18],
-            "Color": [0.55, 0.42, 0.28],
-            "Material": "Ground",
+            "Size": [32, 0.5, 32],
+            "Position": [0, 1.15, -20],
+            "Color": [0.45, 0.34, 0.24],
+            "Material": "SmoothPlastic",
+            "TopSurface": "Smooth",
+            "BottomSurface": "Smooth"
+          }
+        },
+        "PenGateL": {
+          "$className": "Part",
+          "$properties": {
+            "Anchored": true,
+            "Size": [11, 2.4, 0.8],
+            "Position": [-10.5, 2.5, -4],
+            "Color": [0.22, 0.18, 0.14],
+            "Material": "SmoothPlastic",
+            "TopSurface": "Smooth",
+            "BottomSurface": "Smooth"
+          }
+        },
+        "PenGateR": {
+          "$className": "Part",
+          "$properties": {
+            "Anchored": true,
+            "Size": [11, 2.4, 0.8],
+            "Position": [10.5, 2.5, -4],
+            "Color": [0.22, 0.18, 0.14],
+            "Material": "SmoothPlastic",
+            "TopSurface": "Smooth",
+            "BottomSurface": "Smooth"
+          }
+        },
+        "PenRailS": {
+          "$className": "Part",
+          "$properties": {
+            "Anchored": true,
+            "Size": [32, 2.4, 0.8],
+            "Position": [0, 2.5, -36],
+            "Color": [0.22, 0.18, 0.14],
+            "Material": "SmoothPlastic",
+            "TopSurface": "Smooth",
+            "BottomSurface": "Smooth"
+          }
+        },
+        "PenRailW": {
+          "$className": "Part",
+          "$properties": {
+            "Anchored": true,
+            "Size": [0.8, 2.4, 32],
+            "Position": [-16, 2.5, -20],
+            "Color": [0.22, 0.18, 0.14],
+            "Material": "SmoothPlastic",
+            "TopSurface": "Smooth",
+            "BottomSurface": "Smooth"
+          }
+        },
+        "PenRailE": {
+          "$className": "Part",
+          "$properties": {
+            "Anchored": true,
+            "Size": [0.8, 2.4, 32],
+            "Position": [16, 2.5, -20],
+            "Color": [0.22, 0.18, 0.14],
+            "Material": "SmoothPlastic",
+            "TopSurface": "Smooth",
+            "BottomSurface": "Smooth"
+          }
+        },
+        "PenDummies": {
+          "$className": "Model"
+        },
+        "FenceN": {
+          "$className": "Part",
+          "$properties": {
+            "Anchored": true,
+            "Size": [96, 2, 1.2],
+            "Position": [0, 2, 47.4],
+            "Color": [0.22, 0.18, 0.14],
+            "Material": "SmoothPlastic",
+            "TopSurface": "Smooth",
+            "BottomSurface": "Smooth"
+          }
+        },
+        "FenceS": {
+          "$className": "Part",
+          "$properties": {
+            "Anchored": true,
+            "Size": [96, 2, 1.2],
+            "Position": [0, 2, -47.4],
+            "Color": [0.22, 0.18, 0.14],
+            "Material": "SmoothPlastic",
+            "TopSurface": "Smooth",
+            "BottomSurface": "Smooth"
+          }
+        },
+        "FenceW": {
+          "$className": "Part",
+          "$properties": {
+            "Anchored": true,
+            "Size": [1.2, 2, 96],
+            "Position": [-47.4, 2, 0],
+            "Color": [0.22, 0.18, 0.14],
+            "Material": "SmoothPlastic",
+            "TopSurface": "Smooth",
+            "BottomSurface": "Smooth"
+          }
+        },
+        "FenceE": {
+          "$className": "Part",
+          "$properties": {
+            "Anchored": true,
+            "Size": [1.2, 2, 96],
+            "Position": [47.4, 2, 0],
+            "Color": [0.22, 0.18, 0.14],
+            "Material": "SmoothPlastic",
             "TopSurface": "Smooth",
             "BottomSurface": "Smooth"
           }
@@ -88,13 +199,178 @@
           "$properties": {
             "Anchored": true,
             "Size": [8, 1, 8],
-            "Position": [0, 1.5, 28],
-            "Color": [0.85, 0.75, 0.35],
-            "Material": "WoodPlanks",
+            "Position": [0, 1.5, 30],
+            "Color": [0.9, 0.72, 0.28],
+            "Material": "SmoothPlastic",
             "Neutral": true,
             "Duration": 0,
             "TopSurface": "Smooth",
             "BottomSurface": "Smooth"
+          }
+        },
+        "DummyBoard": {
+          "$className": "Model",
+          "PostL": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Size": [1.8, 12, 1.8],
+              "Position": [-34, 7, 6],
+              "Color": [0.2, 0.16, 0.12],
+              "Material": "SmoothPlastic",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth"
+            }
+          },
+          "PostR": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Size": [1.8, 12, 1.8],
+              "Position": [-34, 7, -22],
+              "Color": [0.2, 0.16, 0.12],
+              "Material": "SmoothPlastic",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth"
+            }
+          },
+          "Frame": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Size": [1, 13, 26],
+              "Position": [-34, 8, -8],
+              "Color": [0.76, 0.6, 0.36],
+              "Material": "SmoothPlastic",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth"
+            }
+          },
+          "Title": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Size": [1.2, 2.2, 18],
+              "Position": [-33.2, 15.2, -8],
+              "Color": [0.82, 0.66, 0.4],
+              "Material": "SmoothPlastic",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth"
+            }
+          },
+          "Stalls": {
+            "$className": "Model",
+            "yellow": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Size": [0.6, 5.4, 5.8],
+                "Position": [-33.2, 6.5, 2.8],
+                "Color": [0.95, 0.82, 0.22],
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth"
+              }
+            },
+            "fat": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Size": [0.6, 5.4, 5.8],
+                "Position": [-33.2, 6.5, -3.4],
+                "Color": [0.9, 0.52, 0.28],
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth"
+              }
+            },
+            "gold": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Size": [0.6, 5.4, 5.8],
+                "Position": [-33.2, 6.5, -9.6],
+                "Color": [0.92, 0.72, 0.18],
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth"
+              }
+            },
+            "crowd": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Size": [0.6, 5.4, 5.8],
+                "Position": [-33.2, 6.5, -15.8],
+                "Color": [0.55, 0.55, 0.6],
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth"
+              }
+            }
+          }
+        },
+        "GymBoard": {
+          "$className": "Model",
+          "PostL": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Size": [1.8, 12, 1.8],
+              "Position": [34, 7, 0],
+              "Color": [0.2, 0.16, 0.12],
+              "Material": "SmoothPlastic",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth"
+            }
+          },
+          "PostR": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Size": [1.8, 12, 1.8],
+              "Position": [34, 7, -16],
+              "Color": [0.2, 0.16, 0.12],
+              "Material": "SmoothPlastic",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth"
+            }
+          },
+          "Frame": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Size": [1, 13, 16],
+              "Position": [34, 8, -8],
+              "Color": [0.76, 0.6, 0.36],
+              "Material": "SmoothPlastic",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth"
+            }
+          },
+          "Title": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Size": [1.2, 2.2, 12],
+              "Position": [33.2, 15.2, -8],
+              "Color": [0.82, 0.66, 0.4],
+              "Material": "SmoothPlastic",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth"
+            }
+          },
+          "Stall": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Size": [0.6, 8, 12],
+              "Position": [33.2, 7, -8],
+              "Color": [0.85, 0.45, 0.22],
+              "Material": "SmoothPlastic",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth"
+            }
           }
         }
       }
