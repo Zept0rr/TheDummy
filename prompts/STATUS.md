@@ -1,17 +1,17 @@
 # STATUS
 
-wave: polish-p2
+wave: polish-p3
 branch: the-dummy
 cwd: C:\Users\zepto\worktrees\TheDummy
 paste: NEXT-A.md | NEXT-B.md | NEXT-C.md
 
-A: Phase 2 place — plinths, 6 trees, atmosphere/sky, path to gate (done). Reopen TheDummy.rbxl or Rojo sync.
-B: Phase 1 leftover — Title SurfaceGui on DummyBoard.Title / GymBoard.Title; confirm R6 dummies after reopen.
-C: idle unless needs
+A: Phase 1 verify + Phase 2 place (plinths, trees, atmosphere) done
+B: Phase 1 done (readable cards, board titles, R6 stand-ins). NEXT = Phase 3 juice
+C: idle unless B needs persist copy
 
 blocked: none
 needs: none
-verify: Play Solo — grass + trees, boards on plinths, readable green Buy, titles on boards, dummy in pen
+verify: Play Solo — click Buy flashes/sounds, +Bonk near pen, HUD quieter, yard still has trees/plinths
 
 git: "C:\Program Files\Git\cmd\git.exe" on PATH
 launch: grok --cwd C:\Users\zepto\worktrees\TheDummy

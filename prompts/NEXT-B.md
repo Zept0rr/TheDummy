@@ -4,17 +4,18 @@ Read `prompts/STATUS.md` then `prompts/CONTRACT.md`. cwd worktree `the-dummy`. O
 
 `$env:Path = "C:\Program Files\Git\cmd;" + $env:Path`
 
-## Phase 1 polish
+Phase 1 is **done** (cards, titles, R6 dummies). Do not redo the shop.
 
-Play Solo (Edit will look blank).
+## Phase 3 juice
 
-- Cards readable from the path: title, `copy.level`, green **Buy**, gold **Upgrade**, cost. `SurfaceGui.Active = true`. Fix Face if the camera on the path sees the back of the board.
-- `DummyBoard.Title` / `GymBoard.Title`: SurfaceGui with `copy.tabDummies` / `copy.tabGym`.
-- `World.luau`: blocky R6 in `PenDummies` and on each `Stand`. Cap `world.maxPenDummies`.
-- No ScreenGui shop. HUD stays.
+- Buy/Upgrade click: brief button color flash. Optional local `Sound` (no new remote).
+- `WorldFx`: `+Bonk` near the pen (`Workspace.Backyard.Pen` / `PenDummies`), not random HUD.
+- HUD: smaller, less web-panel; keep Bonk, /sec, dummy count, persist hint. Use `copy` if C added persist-off text.
 
-If a copy key or path is missing, STATUS `needs:` — do not invent.
+No ScreenGui shop. No new remotes.
+
+If you need a copy key, STATUS `needs:` — do not invent.
 
 ## Stop when
 
-STATUS verify: read Buy from the path, dummy appears in the pen, titles on the boards.
+STATUS verify: click Buy feels clicked, +Bonk at the pen, HUD quieter.

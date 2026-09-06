@@ -2,6 +2,8 @@
 
 Read STATUS.md then CONTRACT.md. cwd worktree `the-dummy`. Only Config + Types.
 
-Phase 1: **do nothing** unless STATUS `needs:` names a copy/world key.
+Phase 1–2: **do nothing** unless STATUS `needs:` names a key.
 
-Do not retune costs. Do not invent instance names.
+Optional this phase if B asks: `copy.persistOff` (e.g. `"not saving"`). Do not retune dummy/gym costs unless STATUS says the 2-minute idle feel is dead.
+
+Do not invent instance names.
