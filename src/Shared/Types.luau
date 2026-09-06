@@ -169,12 +169,14 @@ export type CopyConfig = {
 	locked: string,
 	maxed: string,
 	needsRep: string,
+	level: string,
 	hitPopupPrefix: string,
 }
 
 export type WorldConfig = {
 	promptDistance: number,
 	maxPenDummies: number,
+	cardPixelsPerStud: number?,
 }
 
 export type Config = {

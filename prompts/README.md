@@ -1,36 +1,23 @@
-# Prompts — what to paste next
+# Prompts
 
-Convention: **`NEXT-<AGENT>.md` is the only file that agent should paste right now.**
+**Paste exactly one file per session.** Index:
 
-Older files (`AGENT_B.md`, `AGENT_B_BOARDS.md`, …) are previous waves. Do not paste those unless a human says to.
+| Agent | Paste | Owns |
+|---|---|---|
+| A (place / Rojo / Studio) | [NEXT-A.md](NEXT-A.md) | `default.project.json`, `TheDummy.rbxl`, backyard instances |
+| B (client) | [NEXT-B.md](NEXT-B.md) | `src/Client/**` |
+| C (config) | [NEXT-C.md](NEXT-C.md) | `src/Shared/Config.luau`, `src/Shared/Types.luau` |
 
-| Agent | Paste this | Owns | Do not touch |
-|---|---|---|---|
-| **B** | [`NEXT-B.md`](NEXT-B.md) | `src/Client/**` | Server, Config, Types, Formulas, `default.project.json` |
-| **C** | [`NEXT-C.md`](NEXT-C.md) | `src/Shared/Config.luau`, `src/Shared/Types.luau` | Client, Server, Formulas, place file |
+Before coding, every agent reads:
 
-Launch:
+1. [STATUS.md](STATUS.md) — current wave, blocked, needs
+2. [CONTRACT.md](CONTRACT.md) — remotes, snapshot, Config keys, instance paths
+3. Their **NEXT-*.md** only
+
+`AGENTS.md` is game law. `AGENT_*.md` files are archives — do not paste.
 
 ```
 grok --cwd C:\Users\zepto\worktrees\TheDummy
 ```
 
-Branch must be `the-dummy`. Git: `"C:\Program Files\Git\cmd\git.exe"` on PATH.
-
-## Instance names (B binds these)
-
-```
-Workspace.Backyard.DummyBoard.Stalls.yellow
-Workspace.Backyard.DummyBoard.Stalls.yellow.Stand
-Workspace.Backyard.DummyBoard.Stalls.fat
-Workspace.Backyard.DummyBoard.Stalls.fat.Stand
-Workspace.Backyard.DummyBoard.Stalls.gold
-Workspace.Backyard.DummyBoard.Stalls.gold.Stand
-Workspace.Backyard.DummyBoard.Stalls.crowd
-Workspace.Backyard.DummyBoard.Stalls.crowd.Stand
-Workspace.Backyard.GymBoard.Stall
-Workspace.Backyard.GymBoard.Stall.Stand
-Workspace.Backyard.PenDummies
-```
-
-Dummy stall SurfaceGui face = **Right**. Gym stall face = **Left**.
+Branch `the-dummy`. Git: `"C:\Program Files\Git\cmd\git.exe"` on PATH. Commit only owned paths.

@@ -1,5 +1,5 @@
 --!strict
--- 3D dummy/gym boards. SurfaceGui + ProximityPrompt. Fire remotes only.
+-- NI-style 3D cards. Green Buy / gold Upgrade TextButtons fire remotes.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
@@ -30,6 +30,8 @@ type StallSpec = {
 	path: { string },
 	position: Vector3,
 	size: Vector3,
+	standPosition: Vector3,
+	standSize: Vector3,
 	color: Color3,
 	face: Enum.NormalId,
 }
@@ -39,39 +41,49 @@ local DUMMY_IDS = { "yellow", "fat", "gold", "crowd" }
 local DUMMY_STALLS: { [string]: StallSpec } = {
 	yellow = {
 		path = { "Backyard", "DummyBoard", "Stalls", "yellow" },
-		position = Vector3.new(-33.2, 6.5, 2.8),
-		size = Vector3.new(0.6, 5.4, 5.8),
-		color = Color3.fromRGB(242, 209, 56),
+		position = Vector3.new(-31.2, 13.2, -2),
+		size = Vector3.new(0.5, 7, 10),
+		standPosition = Vector3.new(-27, 1.2, -2),
+		standSize = Vector3.new(3, 0.4, 3),
+		color = Color3.fromRGB(51, 56, 71),
 		face = Enum.NormalId.Right,
 	},
 	fat = {
 		path = { "Backyard", "DummyBoard", "Stalls", "fat" },
-		position = Vector3.new(-33.2, 6.5, -3.4),
-		size = Vector3.new(0.6, 5.4, 5.8),
-		color = Color3.fromRGB(230, 133, 71),
+		position = Vector3.new(-31.2, 13.2, -14),
+		size = Vector3.new(0.5, 7, 10),
+		standPosition = Vector3.new(-27, 1.2, -14),
+		standSize = Vector3.new(3, 0.4, 3),
+		color = Color3.fromRGB(51, 56, 71),
 		face = Enum.NormalId.Right,
 	},
 	gold = {
 		path = { "Backyard", "DummyBoard", "Stalls", "gold" },
-		position = Vector3.new(-33.2, 6.5, -9.6),
-		size = Vector3.new(0.6, 5.4, 5.8),
-		color = Color3.fromRGB(235, 184, 46),
+		position = Vector3.new(-31.2, 5.6, -2),
+		size = Vector3.new(0.5, 7, 10),
+		standPosition = Vector3.new(-23.5, 1.2, -2),
+		standSize = Vector3.new(3, 0.4, 3),
+		color = Color3.fromRGB(51, 56, 71),
 		face = Enum.NormalId.Right,
 	},
 	crowd = {
 		path = { "Backyard", "DummyBoard", "Stalls", "crowd" },
-		position = Vector3.new(-33.2, 6.5, -15.8),
-		size = Vector3.new(0.6, 5.4, 5.8),
-		color = Color3.fromRGB(140, 140, 153),
+		position = Vector3.new(-31.2, 5.6, -14),
+		size = Vector3.new(0.5, 7, 10),
+		standPosition = Vector3.new(-23.5, 1.2, -14),
+		standSize = Vector3.new(3, 0.4, 3),
+		color = Color3.fromRGB(51, 56, 71),
 		face = Enum.NormalId.Right,
 	},
 }
 
 local GYM_STALL: StallSpec = {
 	path = { "Backyard", "GymBoard", "Stall" },
-	position = Vector3.new(33.2, 7, -8),
-	size = Vector3.new(0.6, 8, 12),
-	color = Color3.fromRGB(217, 115, 56),
+	position = Vector3.new(31.2, 8, -8),
+	size = Vector3.new(0.5, 12, 14),
+	standPosition = Vector3.new(27, 1.2, -8),
+	standSize = Vector3.new(4, 0.4, 4),
+	color = Color3.fromRGB(51, 56, 71),
 	face = Enum.NormalId.Left,
 }
 
@@ -127,6 +139,15 @@ local function promptDistance(): number
 	return 10
 end
 
+local function cardPixelsPerStud(): number
+	local world = pick(loadConfig(), { "world", "World" })
+	local value = pick(world, { "cardPixelsPerStud", "CardPixelsPerStud" })
+	if typeof(value) == "number" and value == value and value > 0 then
+		return value
+	end
+	return 40
+end
+
 local function follow(path: { string }): Instance?
 	local node: Instance? = Workspace
 	for _, name in path do
@@ -176,6 +197,18 @@ local function ensureStall(spec: StallSpec, fallbackName: string): BasePart
 	part.TopSurface = Enum.SurfaceType.Smooth
 	part.BottomSurface = Enum.SurfaceType.Smooth
 	part.Parent = backyardFolder()
+
+	local stand = Instance.new("Part")
+	stand.Name = "Stand"
+	stand.Anchored = true
+	stand.Size = spec.standSize
+	stand.Position = spec.standPosition
+	stand.Color = Color3.fromRGB(191, 173, 128)
+	stand.Material = Enum.Material.SmoothPlastic
+	stand.TopSurface = Enum.SurfaceType.Smooth
+	stand.BottomSurface = Enum.SurfaceType.Smooth
+	stand.Parent = part
+
 	return part
 end
 
@@ -187,69 +220,148 @@ local function clearClientUi(part: BasePart)
 	end
 end
 
-local function makeLabel(parent: Instance, name: string, textSize: number, color: Color3): TextLabel
+local function makeLabel(parent: Instance, name: string, height: number, textSize: number, color: Color3, font: Enum.Font): TextLabel
 	local label = Instance.new("TextLabel")
 	label.Name = name
 	label.BackgroundTransparency = 1
-	label.Size = UDim2.new(1, 0, 0, textSize + 8)
-	label.Font = Theme.font.title
+	label.Size = UDim2.new(1, 0, 0, height)
+	label.Font = font
 	label.TextSize = textSize
 	label.TextColor3 = color
 	label.TextWrapped = true
 	label.TextTruncate = Enum.TextTruncate.AtEnd
+	label.TextXAlignment = Enum.TextXAlignment.Left
 	label.Text = ""
 	label.Parent = parent
 	return label
 end
 
-type BoardFace = {
+local function makeButton(parent: Instance, name: string, color: Color3): TextButton
+	local button = Instance.new("TextButton")
+	button.Name = name
+	button.AutoButtonColor = true
+	button.Active = true
+	button.BorderSizePixel = 0
+	button.Size = UDim2.new(0.5, -5, 1, 0)
+	button.Font = Theme.font.title
+	button.TextSize = 22
+	button.TextColor3 = Color3.new(1, 1, 1)
+	button.BackgroundColor3 = color
+	button.Text = ""
+	button.TextTruncate = Enum.TextTruncate.AtEnd
+	button.Parent = parent
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 8)
+	corner.Parent = button
+	return button
+end
+
+type CardFace = {
 	title: TextLabel,
 	owned: TextLabel,
-	lineA: TextLabel,
-	lineB: TextLabel,
+	effect: TextLabel,
+	buy: TextButton,
+	upgrade: TextButton,
+	buyCost: TextLabel,
+	upgradeCost: TextLabel,
+	upgradeRow: Frame,
 }
 
-local function makeSurface(part: BasePart, face: Enum.NormalId): BoardFace
+local function makeCard(part: BasePart, face: Enum.NormalId, showUpgrade: boolean): CardFace
 	local gui = Instance.new("SurfaceGui")
 	gui.Name = "BoardGui"
 	gui.Face = face
 	gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
-	gui.PixelsPerStud = 50
+	gui.PixelsPerStud = cardPixelsPerStud()
 	gui.LightInfluence = 0
 	gui.AlwaysOnTop = false
-	gui.MaxDistance = 80
+	gui.MaxDistance = 90
 	gui.ZOffset = 2
-	gui.Active = false
+	gui.Active = true
+	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	gui:SetAttribute("ClientBoard", true)
 	gui.Parent = part
 
 	local frame = Instance.new("Frame")
-	frame.Name = "Panel"
-	frame.BackgroundColor3 = Theme.colors.panel
-	frame.BackgroundTransparency = 0.12
+	frame.Name = "Card"
+	frame.BackgroundColor3 = Theme.colors.card
+	frame.BackgroundTransparency = 0.08
 	frame.BorderSizePixel = 0
 	frame.Size = UDim2.fromScale(1, 1)
 	frame.Parent = gui
 
+	local stroke = Instance.new("UIStroke")
+	stroke.Color = Color3.fromRGB(70, 78, 96)
+	stroke.Thickness = 2
+	stroke.Transparency = 0.25
+	stroke.Parent = frame
+
 	local pad = Instance.new("UIPadding")
-	pad.PaddingLeft = UDim.new(0.08, 0)
-	pad.PaddingRight = UDim.new(0.08, 0)
-	pad.PaddingTop = UDim.new(0.08, 0)
-	pad.PaddingBottom = UDim.new(0.08, 0)
+	pad.PaddingLeft = UDim.new(0.06, 0)
+	pad.PaddingRight = UDim.new(0.06, 0)
+	pad.PaddingTop = UDim.new(0.07, 0)
+	pad.PaddingBottom = UDim.new(0.07, 0)
 	pad.Parent = frame
 
 	local list = Instance.new("UIListLayout")
 	list.FillDirection = Enum.FillDirection.Vertical
 	list.HorizontalAlignment = Enum.HorizontalAlignment.Center
-	list.VerticalAlignment = Enum.VerticalAlignment.Center
+	list.VerticalAlignment = Enum.VerticalAlignment.Top
 	list.Padding = UDim.new(0, 6)
+	list.SortOrder = Enum.SortOrder.LayoutOrder
 	list.Parent = frame
 
+	local title = makeLabel(frame, "Title", 36, 28, Color3.new(1, 1, 1), Theme.font.title)
+	title.LayoutOrder = 1
+	local owned = makeLabel(frame, "Owned", 26, 20, Theme.colors.muted, Theme.font.body)
+	owned.LayoutOrder = 2
+	local effect = makeLabel(frame, "Effect", 40, 16, Theme.colors.muted, Theme.font.body)
+	effect.LayoutOrder = 3
+	effect.TextWrapped = true
+
+	local buttonRow = Instance.new("Frame")
+	buttonRow.Name = "Buttons"
+	buttonRow.BackgroundTransparency = 1
+	buttonRow.Size = UDim2.new(1, 0, 0, 48)
+	buttonRow.LayoutOrder = 4
+	buttonRow.Parent = frame
+
+	local buy = makeButton(buttonRow, "Buy", Theme.colors.buy)
+	buy.Position = UDim2.fromScale(0, 0)
+	buy.Size = if showUpgrade then UDim2.new(0.5, -5, 1, 0) else UDim2.new(1, 0, 1, 0)
+
+	local upgrade = makeButton(buttonRow, "Upgrade", Theme.colors.upgrade)
+	upgrade.AnchorPoint = Vector2.new(1, 0)
+	upgrade.Position = UDim2.fromScale(1, 0)
+	upgrade.Visible = showUpgrade
+
+	local costRow = Instance.new("Frame")
+	costRow.Name = "Costs"
+	costRow.BackgroundTransparency = 1
+	costRow.Size = UDim2.new(1, 0, 0, 26)
+	costRow.LayoutOrder = 5
+	costRow.Parent = frame
+
+	local buyCost = makeLabel(costRow, "BuyCost", 26, 20, Theme.colors.cost, Theme.font.title)
+	buyCost.Size = if showUpgrade then UDim2.new(0.5, -5, 1, 0) else UDim2.new(1, 0, 1, 0)
+	buyCost.TextXAlignment = Enum.TextXAlignment.Center
+
+	local upgradeCost = makeLabel(costRow, "UpgradeCost", 26, 20, Theme.colors.cost, Theme.font.title)
+	upgradeCost.AnchorPoint = Vector2.new(1, 0)
+	upgradeCost.Position = UDim2.fromScale(1, 0)
+	upgradeCost.Size = UDim2.new(0.5, -5, 1, 0)
+	upgradeCost.TextXAlignment = Enum.TextXAlignment.Center
+	upgradeCost.Visible = showUpgrade
+
 	return {
-		title = makeLabel(frame, "Title", 28, Theme.colors.text),
-		owned = makeLabel(frame, "Owned", 22, Theme.colors.muted),
-		lineA = makeLabel(frame, "LineA", 22, Theme.colors.bonk),
-		lineB = makeLabel(frame, "LineB", 20, Theme.colors.muted),
+		title = title,
+		owned = owned,
+		effect = effect,
+		buy = buy,
+		upgrade = upgrade,
+		buyCost = buyCost,
+		upgradeCost = upgradeCost,
+		upgradeRow = buttonRow,
 	}
 end
 
@@ -277,6 +389,15 @@ local function dummyName(id: string): string
 		return named
 	end
 	return id
+end
+
+local function dummyRole(id: string): string
+	local raw = Formulas.dummyRaw(id)
+	local role = pick(raw, { "role", "Role", "description", "Description" })
+	if typeof(role) == "string" and role ~= "" then
+		return role
+	end
+	return ""
 end
 
 local function upgradeIdForDummy(dummyId: string): string?
@@ -308,17 +429,6 @@ local function upgradeIdForDummy(dummyId: string): string?
 			end
 		end
 	end
-
-	local def = Formulas.dummyDef(dummyId)
-	if def == nil then
-		return nil
-	end
-	if def.maxUpgradeLevel <= 0 or Decimal.isZero(def.upgradeBaseCost) then
-		return nil
-	end
-	if Formulas.knownUpgradeId(dummyId) then
-		return dummyId
-	end
 	return nil
 end
 
@@ -335,9 +445,9 @@ local function kind(affordable: boolean, atMax: boolean, locked: boolean): BuyKi
 	return "poor"
 end
 
-local function costLine(buyKind: BuyKind, prefix: string, cost: Decimal?): string
+local function costText(buyKind: BuyKind, cost: Decimal?): string
 	if buyKind == "locked" then
-		return copyText("locked", "Locked")
+		return copyText("needsRep", "Needs Gym Rep")
 	end
 	if buyKind == "max" then
 		return copyText("maxed", "Max")
@@ -345,14 +455,35 @@ local function costLine(buyKind: BuyKind, prefix: string, cost: Decimal?): strin
 	if cost == nil then
 		return "—"
 	end
-	local price = Format.compact(cost)
 	if buyKind == "poor" then
-		return copyText("cantAfford", "Can't afford") .. "  " .. price
+		return copyText("cantAfford", "Can't afford")
 	end
-	return prefix .. "  " .. price
+	return Format.compact(cost)
 end
 
-local function paintPrompt(prompt: ProximityPrompt, buyKind: BuyKind, action: string, object: string, enabledWhenPoor: boolean)
+local function paintButton(button: TextButton, buyKind: BuyKind, readyColor: Color3, label: string)
+	button.Text = label
+	if buyKind == "ready" then
+		button.BackgroundColor3 = readyColor
+		button.TextColor3 = Color3.new(1, 1, 1)
+		button.AutoButtonColor = true
+	else
+		button.BackgroundColor3 = Theme.colors.poor
+		button.TextColor3 = Theme.colors.muted
+		button.AutoButtonColor = false
+	end
+end
+
+local function paintCost(label: TextLabel, buyKind: BuyKind, cost: Decimal?)
+	label.Text = costText(buyKind, cost)
+	if buyKind == "ready" then
+		label.TextColor3 = Theme.colors.cost
+	else
+		label.TextColor3 = Theme.colors.muted
+	end
+end
+
+local function paintPrompt(prompt: ProximityPrompt, buyKind: BuyKind, action: string, object: string)
 	prompt.ObjectText = object
 	if buyKind == "locked" then
 		prompt.ActionText = copyText("locked", "Locked")
@@ -362,7 +493,7 @@ local function paintPrompt(prompt: ProximityPrompt, buyKind: BuyKind, action: st
 		prompt.Enabled = false
 	elseif buyKind == "poor" then
 		prompt.ActionText = copyText("cantAfford", "Can't afford")
-		prompt.Enabled = enabledWhenPoor
+		prompt.Enabled = true
 	else
 		prompt.ActionText = action
 		prompt.Enabled = true
@@ -376,13 +507,21 @@ local function bindDummy(id: string, remotes: Remotes): DummyBinding?
 		return nil
 	end
 
-	local part = ensureStall(spec, "Stall_" .. id)
+	local part = ensureStall(spec, id)
 	clearClientUi(part)
-	local face = makeSurface(part, spec.face)
+	local card = makeCard(part, spec.face, true)
 	local buyPrompt = makePrompt(part, "Buy", Enum.KeyCode.E, Enum.KeyCode.ButtonX, 0)
 	local upgradePrompt = makePrompt(part, "Upgrade", Enum.KeyCode.R, Enum.KeyCode.ButtonY, 72)
 	local upgradeId = upgradeIdForDummy(id)
 
+	card.buy.Activated:Connect(function()
+		remotes.buyDummy:FireServer(id)
+	end)
+	card.upgrade.Activated:Connect(function()
+		if upgradeId ~= nil then
+			remotes.buyUpgrade:FireServer(upgradeId)
+		end
+	end)
 	buyPrompt.Triggered:Connect(function()
 		remotes.buyDummy:FireServer(id)
 	end)
@@ -401,46 +540,41 @@ local function bindDummy(id: string, remotes: Remotes): DummyBinding?
 		local affordable = cost ~= nil and Decimal.gte(state.bonk, cost)
 		local buyKind = kind(affordable, atMax, locked)
 		local name = dummyName(id)
-		local ownedText = if def ~= nil then `{owned} / {def.maxCount}` else `x{owned}`
+		local ownedText = if def ~= nil then `Owned {owned} / {def.maxCount}` else `Owned {owned}`
 
-		face.title.Text = name
-		face.owned.Text = ownedText
+		card.title.Text = name
+		card.owned.Text = if locked then copyText("locked", "Locked") else ownedText
+		card.effect.Text = if locked then copyText("needsRep", "Needs Gym Rep") else dummyRole(id)
+
+		paintButton(card.buy, buyKind, Theme.colors.buy, copyText("buy", "Buy"))
+		paintCost(card.buyCost, buyKind, cost)
+		paintPrompt(buyPrompt, buyKind, copyText("buy", "Buy"), name)
+
 		if locked then
-			face.owned.Text = copyText("locked", "Locked")
-			face.lineA.Text = copyText("needsRep", "Needs Gym Rep")
-			face.lineA.TextColor3 = Theme.colors.muted
-			face.lineB.Text = ""
-		else
-			face.lineA.Text = costLine(buyKind, copyText("buy", "Buy"), cost)
-			face.lineA.TextColor3 = if buyKind == "ready" then Theme.colors.bonk else Theme.colors.muted
-		end
-
-		paintPrompt(buyPrompt, buyKind, copyText("buy", "Buy"), name .. "  " .. ownedText, true)
-
-		if upgradeId == nil or locked then
+			card.upgrade.Visible = true
+			card.upgradeCost.Visible = true
+			paintButton(card.upgrade, "locked", Theme.colors.upgrade, copyText("upgrade", "Upgrade"))
+			paintCost(card.upgradeCost, "locked", nil)
 			upgradePrompt.Enabled = false
-			face.lineB.Visible = false
-			face.lineB.Text = ""
-			if locked then
-				upgradePrompt.ObjectText = copyText("needsRep", "Needs Gym Rep")
-				upgradePrompt.ActionText = copyText("locked", "Locked")
-			end
+		elseif upgradeId == nil then
+			card.upgrade.Visible = false
+			card.upgradeCost.Visible = false
+			card.buy.Size = UDim2.new(1, 0, 1, 0)
+			card.buyCost.Size = UDim2.new(1, 0, 1, 0)
+			upgradePrompt.Enabled = false
 		else
+			card.upgrade.Visible = true
+			card.upgradeCost.Visible = true
 			local upgradeDef = Formulas.upgradeDef(upgradeId)
 			local level = math.max(0, math.floor(state.dummyUpgrades[upgradeId] or 0))
 			local upgradeMax = upgradeDef ~= nil and level >= upgradeDef.maxLevel
 			local upgradeCost = Formulas.upgradeCost(upgradeId, level)
 			local upgradeAfford = upgradeCost ~= nil and Decimal.gte(state.bonk, upgradeCost)
 			local upgradeKind = kind(upgradeAfford, upgradeMax, false)
-			local upgradeLabel = copyText("upgrade", "Upgrade")
-			local named = pick(Formulas.upgradeRaw(upgradeId), { "name", "Name" })
-			if typeof(named) == "string" and named ~= "" then
-				upgradeLabel = named
-			end
-			face.lineB.Visible = true
-			face.lineB.Text = costLine(upgradeKind, upgradeLabel, upgradeCost)
-			face.lineB.TextColor3 = if upgradeKind == "ready" then Theme.colors.text else Theme.colors.muted
-			paintPrompt(upgradePrompt, upgradeKind, copyText("upgrade", "Upgrade"), upgradeLabel, true)
+			local lv = copyText("level", "Lv")
+			paintButton(card.upgrade, upgradeKind, Theme.colors.upgrade, `{copyText("upgrade", "Upgrade")}  {lv} {level}`)
+			paintCost(card.upgradeCost, upgradeKind, upgradeCost)
+			paintPrompt(upgradePrompt, upgradeKind, copyText("upgrade", "Upgrade"), `{lv} {level}`)
 		end
 	end
 
@@ -448,13 +582,14 @@ local function bindDummy(id: string, remotes: Remotes): DummyBinding?
 end
 
 local function bindGym(remotes: Remotes): DummyBinding
-	local part = ensureStall(GYM_STALL, "Stall_gym")
+	local part = ensureStall(GYM_STALL, "Stall")
 	clearClientUi(part)
-	local face = makeSurface(part, GYM_STALL.face)
+	local card = makeCard(part, GYM_STALL.face, false)
 	local buyPrompt = makePrompt(part, "Buy", Enum.KeyCode.E, Enum.KeyCode.ButtonX, 0)
-	face.lineB.Visible = false
-	face.lineB.Text = ""
 
+	card.buy.Activated:Connect(function()
+		remotes.buyGym:FireServer()
+	end)
 	buyPrompt.Triggered:Connect(function()
 		remotes.buyGym:FireServer()
 	end)
@@ -463,20 +598,25 @@ local function bindGym(remotes: Remotes): DummyBinding
 		local cfg = loadConfig()
 		local gym = pick(cfg, { "gym", "Gym" })
 		local named = pick(gym, { "name", "Name" })
-		local title = if typeof(named) == "string" and named ~= "" then named else "This Gym"
+		local title = if typeof(named) == "string" and named ~= "" then named else copyText("tabGym", "This Gym")
+		local flavor = pick(gym, { "flavor", "Flavor", "role", "Role" })
 		local maxLevel = Formulas.gymMaxLevel()
 		local level = math.clamp(state.gymLevel, 1, maxLevel)
 		local atMax = level >= maxLevel
 		local cost = if atMax then nil else Formulas.gymCost(level)
 		local affordable = cost ~= nil and Decimal.gte(state.bonk, cost)
 		local buyKind = kind(affordable, atMax, false)
-		local ownedText = `Level {level} / {maxLevel}`
+		local lv = copyText("level", "Lv")
+		local ownedText = `{lv} {level} / {maxLevel}`
 
-		face.title.Text = title
-		face.owned.Text = ownedText
-		face.lineA.Text = costLine(buyKind, copyText("gymBuy", "Buy gym level"), cost)
-		face.lineA.TextColor3 = if buyKind == "ready" then Theme.colors.bonk else Theme.colors.muted
-		paintPrompt(buyPrompt, buyKind, copyText("gymBuy", "Buy gym level"), ownedText, true)
+		card.title.Text = title
+		card.owned.Text = ownedText
+		card.effect.Text = if typeof(flavor) == "string" and flavor ~= ""
+			then flavor
+			else "Fighters hit harder in this venue."
+		paintButton(card.buy, buyKind, Theme.colors.buy, copyText("gymBuy", "Buy gym level"))
+		paintCost(card.buyCost, buyKind, cost)
+		paintPrompt(buyPrompt, buyKind, copyText("gymBuy", "Buy gym level"), ownedText)
 	end
 
 	return { refresh = refresh }

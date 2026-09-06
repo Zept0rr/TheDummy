@@ -16,6 +16,10 @@ export type Theme = {
 		tabOn: Color3,
 		tabOff: Color3,
 		hit: Color3,
+		buy: Color3,
+		upgrade: Color3,
+		cost: Color3,
+		card: Color3,
 	},
 	font: {
 		display: Enum.Font,
@@ -40,6 +44,10 @@ local Theme: Theme = {
 		tabOn = Color3.fromRGB(255, 196, 74),
 		tabOff = Color3.fromRGB(72, 60, 52),
 		hit = Color3.fromRGB(255, 220, 120),
+		buy = Color3.fromRGB(46, 196, 74),
+		upgrade = Color3.fromRGB(232, 176, 36),
+		cost = Color3.fromRGB(255, 220, 70),
+		card = Color3.fromRGB(24, 28, 38),
 	},
 	font = {
 		display = Enum.Font.GothamBold,

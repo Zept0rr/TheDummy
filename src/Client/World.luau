@@ -1,5 +1,5 @@
 --!strict
--- Pen dummy stand-ins. Count from State, tint from Config. Display only.
+-- Blocky R6 dummy stand-ins. Pen count from State; stall.Stand gets a display dummy.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
@@ -12,6 +12,17 @@ type ClientState = State.ClientState
 
 local DEFAULT_CAP = 12
 local DEFAULT_ORDER = { "yellow", "fat", "gold", "crowd" }
+local STALL_IDS = { "yellow", "fat", "gold", "crowd" }
+
+-- Classic R6 block sizes. Offsets are from feet (Y = 0).
+local R6_PARTS: { { name: string, size: Vector3, offset: Vector3 } } = {
+	{ name = "Head", size = Vector3.new(2, 1, 1), offset = Vector3.new(0, 4.5, 0) },
+	{ name = "Torso", size = Vector3.new(2, 2, 1), offset = Vector3.new(0, 3, 0) },
+	{ name = "LeftArm", size = Vector3.new(1, 2, 1), offset = Vector3.new(-1.5, 3, 0) },
+	{ name = "RightArm", size = Vector3.new(1, 2, 1), offset = Vector3.new(1.5, 3, 0) },
+	{ name = "LeftLeg", size = Vector3.new(1, 2, 1), offset = Vector3.new(-0.5, 1, 0) },
+	{ name = "RightLeg", size = Vector3.new(1, 2, 1), offset = Vector3.new(0.5, 1, 0) },
+}
 
 local World = {}
 
@@ -107,6 +118,17 @@ local function backyard(): Instance
 	return model
 end
 
+local function follow(path: { string }): Instance?
+	local node: Instance? = Workspace
+	for _, name in path do
+		if node == nil then
+			return nil
+		end
+		node = node:FindFirstChild(name)
+	end
+	return node
+end
+
 local function penFolder(): Model
 	local yard = backyard()
 	local existing = yard:FindFirstChild("PenDummies")
@@ -147,35 +169,35 @@ local function addPart(parent: Model, name: string, size: Vector3, offset: Vecto
 	return part
 end
 
-local function makeStandIn(): Model
+local function makeR6(scale: number): Model
 	local model = Instance.new("Model")
 	model.Name = "StandIn"
 	model:SetAttribute("ClientStandIn", true)
-
 	local color = Color3.fromRGB(255, 216, 64)
-	addPart(model, "Torso", Vector3.new(2, 2, 1.2), Vector3.new(0, 2.7, 0), color)
-	addPart(model, "Head", Vector3.new(1.25, 1.25, 1.25), Vector3.new(0, 4.2, 0), color)
-	addPart(model, "LeftLeg", Vector3.new(0.75, 1.8, 0.75), Vector3.new(-0.5, 0.9, 0), color)
-	addPart(model, "RightLeg", Vector3.new(0.75, 1.8, 0.75), Vector3.new(0.5, 0.9, 0), color)
-	addPart(model, "LeftArm", Vector3.new(0.55, 1.8, 0.55), Vector3.new(-1.3, 2.65, 0), color)
-	addPart(model, "RightArm", Vector3.new(0.55, 1.8, 0.55), Vector3.new(1.3, 2.65, 0), color)
-
+	for _, def in R6_PARTS do
+		addPart(model, def.name, def.size * scale, def.offset * scale, color)
+	end
 	return model
 end
 
 local function paint(model: Model, color: Color3)
 	for _, child in model:GetChildren() do
 		if child:IsA("BasePart") then
-			child.Color = color
 			if child.Name == "Head" then
 				child.Color = color:Lerp(Color3.new(1, 1, 1), 0.12)
+			else
+				child.Color = color
 			end
 		end
 	end
 end
 
-local function move(model: Model, feet: Vector3)
-	local root = CFrame.lookAt(feet, feet + Vector3.new(0, 0, 1))
+local function move(model: Model, feet: Vector3, look: Vector3)
+	local target = feet + look
+	if look.Magnitude < 1e-4 then
+		target = feet + Vector3.new(0, 0, 1)
+	end
+	local root = CFrame.lookAt(feet, Vector3.new(target.X, feet.Y, target.Z))
 	for _, child in model:GetChildren() do
 		if child:IsA("BasePart") then
 			local offset = child:GetAttribute("Offset")
@@ -224,38 +246,110 @@ local function gridPositions(count: number): { Vector3 }
 	return positions
 end
 
+local function findStand(path: { string }): BasePart?
+	local node = follow(path)
+	if node == nil then
+		return nil
+	end
+	local stand = node:FindFirstChild("Stand")
+	if stand and stand:IsA("BasePart") then
+		return stand
+	end
+	if node:IsA("BasePart") and node.Name == "Stand" then
+		return node
+	end
+	return nil
+end
+
+local function standFeet(stand: BasePart): Vector3
+	return Vector3.new(stand.Position.X, stand.Position.Y + stand.Size.Y / 2, stand.Position.Z)
+end
+
+local function clearStandIns(root: Instance)
+	for _, inst in root:GetDescendants() do
+		if inst:GetAttribute("ClientStandIn") == true then
+			inst:Destroy()
+		end
+	end
+end
+
 function World.mount()
 	Workspace:WaitForChild("Backyard", 8)
+	local yard = backyard()
 	local pen = penFolder()
 
-	for _, child in pen:GetChildren() do
-		if child:GetAttribute("ClientStandIn") == true then
-			child:Destroy()
+	clearStandIns(yard)
+
+	local pool: { Model } = {}
+	local stallDummies: { [string]: Model } = {}
+	local gymDummy: Model? = nil
+
+	local function ensurePen(n: number)
+		while #pool < n do
+			table.insert(pool, makeR6(0.85))
 		end
 	end
 
-	local pool: { Model } = {}
+	local function ensureStallDummy(id: string, stand: BasePart): Model
+		local existing = stallDummies[id]
+		if existing ~= nil then
+			return existing
+		end
+		local model = makeR6(0.55)
+		model.Name = "DisplayDummy"
+		model.Parent = stand
+		stallDummies[id] = model
+		return model
+	end
 
-	local function ensure(n: number)
-		while #pool < n do
-			table.insert(pool, makeStandIn())
+	local function placeStallDisplays(state: ClientState)
+		for _, id in STALL_IDS do
+			local stand = findStand({ "Backyard", "DummyBoard", "Stalls", id })
+			if stand ~= nil then
+				local model = ensureStallDummy(id, stand)
+				local owned = math.max(0, math.floor(state.dummies[id] or 0))
+				local locked = not Formulas.canUnlockDummy(id, state.lifetimeGymRep)
+				local tint = tintOf(id)
+				if locked then
+					tint = tint:Lerp(Color3.fromRGB(40, 40, 48), 0.55)
+				elseif owned <= 0 then
+					tint = tint:Lerp(Color3.fromRGB(80, 80, 90), 0.35)
+				end
+				paint(model, tint)
+				move(model, standFeet(stand), Vector3.new(1, 0, 0))
+				model.Parent = stand
+			end
+		end
+
+		local gymStand = findStand({ "Backyard", "GymBoard", "Stall" })
+		if gymStand ~= nil then
+			local model = gymDummy
+			if model == nil then
+				model = makeR6(0.7)
+				model.Name = "DisplayDummy"
+				gymDummy = model
+			end
+			paint(model, Color3.fromRGB(232, 140, 56))
+			move(model, standFeet(gymStand), Vector3.new(-1, 0, 0))
+			model.Parent = gymStand
 		end
 	end
 
 	State.subscribe(function(state)
 		local slots = slotsFor(state)
-		ensure(#slots)
+		ensurePen(#slots)
 		local positions = gridPositions(math.max(#slots, 1))
 		for index, model in pool do
 			local slot = slots[index]
 			if slot ~= nil then
 				model.Parent = pen
 				paint(model, slot.tint)
-				move(model, positions[index])
+				move(model, positions[index], Vector3.new(0, 0, 1))
 			else
 				model.Parent = nil
 			end
 		end
+		placeStallDisplays(state)
 	end)
 end
 

@@ -415,12 +415,14 @@ local Config: Types.Config = {
 		locked = "Locked",
 		maxed = "Max",
 		needsRep = "Needs Gym Rep",
+		level = "Lv",
 		hitPopupPrefix = "+",
 	},
 
 	world = {
 		promptDistance = 10,
 		maxPenDummies = 12,
+		cardPixelsPerStud = 40,
 	},
 }
 

@@ -1,24 +1,24 @@
 # NEXT — Agent C (paste this)
 
-You are Agent C. Read `prompts/README.md` then this file. `AGENTS.md` is source of truth.
+Read `prompts/STATUS.md` then `prompts/CONTRACT.md`, then this file. `AGENTS.md` is game law.
 
-**Work in** `C:\Users\zepto\worktrees\TheDummy` **branch** `the-dummy`.  
-Only `git add src/Shared/Config.luau src/Shared/Types.luau`. Do not checkout `master`. Do not paste `AGENT_C.md` or `AGENT_C_BOARDS.md` — those waves are done.
+**cwd** `C:\Users\zepto\worktrees\TheDummy` **branch** `the-dummy`  
+Only `git add src/Shared/Config.luau src/Shared/Types.luau`. Do not checkout `master`. Do not invent instance names. Do not retune dummy/gym costs.
 
 `$env:Path = "C:\Program Files\Git\cmd;" + $env:Path`
 
 ## Already done
 
-`copy.buy/upgrade/gymBuy/cantAfford/locked/maxed/needsRep` and `world.promptDistance` / `world.maxPenDummies` exist. Keep them.
+`copy.buy/upgrade/gymBuy/cantAfford/locked/maxed/needsRep` and `world.promptDistance` / `maxPenDummies`. Keep them.
 
-## This pass
+## This pass (STATUS `needs: B needs copy.level`)
 
-Do **not** retune dummy/gym costs.
+1. `Config.copy.level` = `"Lv"`
+2. Optional `world.cardPixelsPerStud` (e.g. 40)
+3. Types: `CopyConfig.level`; optional `WorldConfig.cardPixelsPerStud`
 
-1. `Config.copy.level` = `"Lv"` (B’s NI cards).
-2. Optional `world.cardPixelsPerStud` (e.g. 40) if you want B to read it.
-3. Types: add `level` on `CopyConfig`; add optional `cardPixelsPerStud` on `WorldConfig`.
+If B needs another copy key, add it only if STATUS `needs:` names it.
 
 ## Stop when
 
-`Config.copy.level` and Types compile. B can require them without guessing strings.
+`copy.level` exists and Types compile. Then STATUS `needs` for that key is cleared (A updates STATUS after your commit).
