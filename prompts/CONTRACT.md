@@ -39,7 +39,7 @@ Upgrade ids (Config): `yellow_power` `fat_stay` `gold_power` `crowd_power`
 ## Config keys B may read
 
 `copy.bonk` `copy.bonkPerSec` `copy.buy` `copy.upgrade` `copy.gymBuy` `copy.cantAfford` `copy.locked` `copy.maxed` `copy.needsRep` `copy.hitPopupPrefix`  
-`copy.level` — **needed** this wave (C)  
+`copy.level` — exists (`"Lv"`)  
 `world.promptDistance` `world.maxPenDummies`  
 `world.cardPixelsPerStud` — optional  
 `dummies[id].tint` `{ r, g, b }`  
