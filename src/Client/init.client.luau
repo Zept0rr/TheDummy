@@ -1,13 +1,14 @@
 --!strict
--- Wave 1 client bootstrap. HUD + dummy/gym shop + hit popups.
+-- Wave 1 client bootstrap. HUD + 3D boards + pen stand-ins + hit popups.
 -- Spend is FireServer only. Client never grants Bonk.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local Boards = require(script.Boards)
 local Hud = require(script.Hud)
-local ShopUI = require(script.ShopUI)
 local State = require(script.State)
+local World = require(script.World)
 local WorldFx = require(script.WorldFx)
 
 local Formulas = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Formulas"))
@@ -36,7 +37,8 @@ gui.DisplayOrder = 50
 gui.Parent = playerGui
 
 Hud.mount(gui)
-ShopUI.mount(gui, {
+World.mount()
+Boards.mount({
 	buyDummy = buyDummy,
 	buyUpgrade = buyUpgrade,
 	buyGym = buyGym,
