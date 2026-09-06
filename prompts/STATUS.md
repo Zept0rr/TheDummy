@@ -1,17 +1,17 @@
 # STATUS
 
-wave: polish-p1
+wave: polish-p2
 branch: the-dummy
 cwd: C:\Users\zepto\worktrees\TheDummy
 paste: NEXT-A.md | NEXT-B.md | NEXT-C.md
 
-A: verify Play Solo; no yard rebuild unless a CONTRACT path is missing
-B: Phase 1 — readable NI cards in Play, titles on DummyBoard.Title / GymBoard.Title, R6 dummies in pen + Stands
-C: idle unless B sets needs
+A: Phase 2 place — plinths, 6 trees, atmosphere/sky, path to gate (done). Reopen TheDummy.rbxl or Rojo sync.
+B: Phase 1 leftover — Title SurfaceGui on DummyBoard.Title / GymBoard.Title; confirm R6 dummies after reopen.
+C: idle unless needs
 
 blocked: none
 needs: none
-verify: Play Solo from spawn — read Buy/Upgrade on cards, dummy in pen matches owned, titles DUMMIES/GYM, no ScreenGui shop
+verify: Play Solo — grass + trees, boards on plinths, readable green Buy, titles on boards, dummy in pen
 
 git: "C:\Program Files\Git\cmd\git.exe" on PATH
 launch: grok --cwd C:\Users\zepto\worktrees\TheDummy
