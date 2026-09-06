@@ -162,9 +162,19 @@ export type CopyConfig = {
 	tabGym: string,
 	tabRep: string,
 	tabVenues: string,
+	buy: string,
+	upgrade: string,
+	gymBuy: string,
+	cantAfford: string,
 	locked: string,
 	maxed: string,
+	needsRep: string,
 	hitPopupPrefix: string,
+}
+
+export type WorldConfig = {
+	promptDistance: number,
+	maxPenDummies: number,
 }
 
 export type Config = {
@@ -185,6 +195,7 @@ export type Config = {
 	repShop: RepShopConfig,
 	numberFormat: NumberFormatConfig,
 	copy: CopyConfig,
+	world: WorldConfig,
 }
 
 -- Matches PlayerData.Profile. Bonk is Decimal { m, e }, never a raw number.

@@ -408,9 +408,19 @@ local Config: Types.Config = {
 		tabGym = "This Gym",
 		tabRep = "Rep",
 		tabVenues = "Venues",
+		buy = "Buy",
+		upgrade = "Upgrade",
+		gymBuy = "Buy gym level",
+		cantAfford = "Can't afford",
 		locked = "Locked",
 		maxed = "Max",
+		needsRep = "Needs Gym Rep",
 		hitPopupPrefix = "+",
+	},
+
+	world = {
+		promptDistance = 10,
+		maxPenDummies = 12,
 	},
 }
 
