@@ -1,17 +1,17 @@
 # STATUS
 
-wave: boards-ni
+wave: polish-p1
 branch: the-dummy
 cwd: C:\Users\zepto\worktrees\TheDummy
 paste: NEXT-A.md | NEXT-B.md | NEXT-C.md
 
-A: grass yard + named stalls/Stands (done). After B: Play Solo verify, rebuild rbxl if needed.
-B: NI cards (green Buy TextButton) in Boards.luau — finish + verify in Studio if not done.
-C: copy.level + world.cardPixelsPerStud landed. No open C work unless B sets needs.
+A: verify Play Solo; no yard rebuild unless a CONTRACT path is missing
+B: Phase 1 — readable NI cards in Play, titles on DummyBoard.Title / GymBoard.Title, R6 dummies in pen + Stands
+C: idle unless B sets needs
 
 blocked: none
 needs: none
-verify: Play Solo — grass, green Buy on cards, buy yellow → rate + dummy in pen, crowd locked, gym card raises rate, no ScreenGui shop
+verify: Play Solo from spawn — read Buy/Upgrade on cards, dummy in pen matches owned, titles DUMMIES/GYM, no ScreenGui shop
 
 git: "C:\Program Files\Git\cmd\git.exe" on PATH
 launch: grok --cwd C:\Users\zepto\worktrees\TheDummy

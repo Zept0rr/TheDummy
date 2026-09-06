@@ -1,26 +1,20 @@
 # NEXT — Agent B (paste this)
 
-Read `prompts/STATUS.md` then `prompts/CONTRACT.md`, then this file. `AGENTS.md` is game law.
-
-**cwd** `C:\Users\zepto\worktrees\TheDummy` **branch** `the-dummy`  
-Only `git add src/Client/**`. Do not checkout `master`. Do not invent Config keys or instance names — if missing, set STATUS `needs:` and stop that part.
+Read `prompts/STATUS.md` then `prompts/CONTRACT.md`. cwd worktree `the-dummy`. Only `src/Client/**`.
 
 `$env:Path = "C:\Program Files\Git\cmd;" + $env:Path`
 
-## Already done
+## Phase 1 polish
 
-`Boards.luau` / `World.luau` (ProximityPrompt + labels). `ShopUI` gone. HUD stays.
+Play Solo (Edit will look blank).
 
-## This pass — Noob Incremental **cards** (not plywood tiles)
+- Cards readable from the path: title, `copy.level`, green **Buy**, gold **Upgrade**, cost. `SurfaceGui.Active = true`. Fix Face if the camera on the path sees the back of the board.
+- `DummyBoard.Title` / `GymBoard.Title`: SurfaceGui with `copy.tabDummies` / `copy.tabGym`.
+- `World.luau`: blocky R6 in `PenDummies` and on each `Stand`. Cap `world.maxPenDummies`.
+- No ScreenGui shop. HUD stays.
 
-Do not copy NI names (Oof, Noobs, Runes).
-
-- SurfaceGui **card**: title, owned/`copy.level`, effect, **green TextButton Buy**, **gold TextButton Upgrade**, yellow cost.
-- `SurfaceGui.Active = true`. Buttons fire CONTRACT remotes. ProximityPrompt optional extra.
-- Can’t-afford / locked / max from `copy.cantAfford` `needsRep` `maxed`.
-- `World.luau`: blocky R6 dummy (head + torso + limbs), `dummies[id].tint`, cap `world.maxPenDummies`. Parent to `stall.Stand` when present.
-- Paths and faces: CONTRACT.md only.
+If a copy key or path is missing, STATUS `needs:` — do not invent.
 
 ## Stop when
 
-STATUS `verify` line: green Buy on cards; yellow Buy → count + Bonk/sec + dummy in pen; crowd locked; gym raises rate; no ScreenGui shop.
+STATUS verify: read Buy from the path, dummy appears in the pen, titles on the boards.
