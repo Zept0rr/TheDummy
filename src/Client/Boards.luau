@@ -2,6 +2,7 @@
 -- NI-style 3D cards. Green Buy / gold Upgrade TextButtons fire remotes.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
 local Workspace = game:GetService("Workspace")
 
 local Format = require(script.Parent.Format)
@@ -236,6 +237,8 @@ local function makeLabel(parent: Instance, name: string, height: number, textSiz
 	return label
 end
 
+local FLASH = TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+
 local function makeButton(parent: Instance, name: string, color: Color3): TextButton
 	local button = Instance.new("TextButton")
 	button.Name = name
@@ -253,7 +256,46 @@ local function makeButton(parent: Instance, name: string, color: Color3): TextBu
 	local corner = Instance.new("UICorner")
 	corner.CornerRadius = UDim.new(0, 8)
 	corner.Parent = button
+
+	local flash = Instance.new("Frame")
+	flash.Name = "Flash"
+	flash.BackgroundColor3 = Color3.new(1, 1, 1)
+	flash.BackgroundTransparency = 1
+	flash.BorderSizePixel = 0
+	flash.Size = UDim2.fromScale(1, 1)
+	flash.ZIndex = 2
+	flash.Parent = button
+	local flashCorner = Instance.new("UICorner")
+	flashCorner.CornerRadius = UDim.new(0, 8)
+	flashCorner.Parent = flash
+
 	return button
+end
+
+local function clickSound(host: BasePart): Sound
+	local existing = host:FindFirstChild("ClickSound")
+	if existing and existing:IsA("Sound") then
+		return existing
+	end
+	local sound = Instance.new("Sound")
+	sound.Name = "ClickSound"
+	sound.SoundId = "rbxasset://sounds/electronicpingshort.wav"
+	sound.Volume = 0.4
+	sound.PlaybackSpeed = 1.2
+	sound.RollOffMaxDistance = 48
+	sound:SetAttribute("ClientBoard", true)
+	sound.Parent = host
+	return sound
+end
+
+local function clickFeel(button: TextButton, host: BasePart)
+	local flash = button:FindFirstChild("Flash")
+	if flash and flash:IsA("Frame") then
+		flash.BackgroundTransparency = 0.15
+		TweenService:Create(flash, FLASH, { BackgroundTransparency = 1 }):Play()
+	end
+	local sound = clickSound(host)
+	sound:Play()
 end
 
 type CardFace = {
@@ -521,17 +563,21 @@ local function bindDummy(id: string, remotes: Remotes): DummyBinding?
 	local upgradeId = upgradeIdForDummy(id)
 
 	card.buy.Activated:Connect(function()
+		clickFeel(card.buy, part)
 		remotes.buyDummy:FireServer(id)
 	end)
 	card.upgrade.Activated:Connect(function()
+		clickFeel(card.upgrade, part)
 		if upgradeId ~= nil then
 			remotes.buyUpgrade:FireServer(upgradeId)
 		end
 	end)
 	buyPrompt.Triggered:Connect(function()
+		clickFeel(card.buy, part)
 		remotes.buyDummy:FireServer(id)
 	end)
 	upgradePrompt.Triggered:Connect(function()
+		clickFeel(card.upgrade, part)
 		if upgradeId ~= nil then
 			remotes.buyUpgrade:FireServer(upgradeId)
 		end
@@ -594,9 +640,11 @@ local function bindGym(remotes: Remotes): DummyBinding
 	local buyPrompt = makePrompt(part, "Buy", Enum.KeyCode.E, Enum.KeyCode.ButtonX, 0)
 
 	card.buy.Activated:Connect(function()
+		clickFeel(card.buy, part)
 		remotes.buyGym:FireServer()
 	end)
 	buyPrompt.Triggered:Connect(function()
+		clickFeel(card.buy, part)
 		remotes.buyGym:FireServer()
 	end)
 
